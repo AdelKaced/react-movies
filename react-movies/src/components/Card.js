@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import FavoriteMovie from '../context/UserContext';
+import React from 'react';
+// import FavoriteMovie from '../context/UserContext';
 
 const genre = [
   { id: 28, name: 'Action' },
@@ -23,8 +23,15 @@ const genre = [
   { id: 37, name: 'Western' },
 ];
 
-const Card = ({ movie, component }) => {
-  const { favorite, setFavorite } = useContext(FavoriteMovie);
+const Card = ({
+  movie,
+  component,
+  setNewData,
+  newData,
+  setListData,
+  listData,
+}) => {
+  // const { favorite, setFavorite } = useContext(FavoriteMovie);
 
   const dateFormat = (date) => {
     let [yy, mm, dd] = date.split('-');
@@ -37,6 +44,29 @@ const Card = ({ movie, component }) => {
       genresName.push(genre.find((res) => res.id === genreId[i]).name);
     }
     return genresName;
+  };
+
+  const addStorage = () => {
+    let storedData = window.localStorage.movie
+      ? window.localStorage.movie.split(',')
+      : [];
+    if (!storedData.includes(movie.id.toString())) storedData.push(movie.id);
+    window.localStorage.movie = storedData;
+  };
+
+  const deleteStorage = () => {
+    let storedData = window.localStorage.movie
+      ? window.localStorage.movie.split(',')
+      : [];
+    const deleteData = storedData.filter((res) => res !== movie.id.toString());
+    window.localStorage.movie = deleteData;
+    // let filter = [];
+    // for (let i = 0; i < storedData.length; i++) {
+    //   const obj = listData.find((res) => res.id == storedData[i]);
+    //   filter.push(obj);
+    // }
+    setNewData(!newData);
+    // setListData(filter);
   };
 
   return (
@@ -61,13 +91,12 @@ const Card = ({ movie, component }) => {
       </h4>
 
       <ul>
-        {genreFormat(movie.genre_ids).length > 0 ? (
-          genreFormat(movie.genre_ids).map((genreName, index) => (
-            <li key={index}>{genreName}</li>
-          ))
-        ) : (
-          <li>UnClassify</li>
-        )}
+        {movie.genre_ids
+          ? genreFormat(movie.genre_ids).length > 0 &&
+            genreFormat(movie.genre_ids).map((genreName, index) => (
+              <li key={index}>{genreName}</li>
+            ))
+          : movie.genres.map((genre) => <li>{genre.name}</li>)}
       </ul>
       {movie.overview && (
         <div>
@@ -75,23 +104,20 @@ const Card = ({ movie, component }) => {
           <p>{movie.overview}</p>
         </div>
       )}
-      {component ==='userList' ? (
+      {component === 'userList' ? (
         <div
           className="btn"
-          onClick={() => {
-            const newFavorite = favorite.filter((res) => res.id !== movie.id);
-            setFavorite(newFavorite);
-          }}
+          onClick={deleteStorage}
+          // const newFavorite = favorite.filter((res) => res.id !== movie.id);
+          // setFavorite(newFavorite);
         >
           Delete to Favorite
         </div>
       ) : (
         <div
           className="btn"
-          onClick={() => {
-            console.log(movie);
-            setFavorite([...favorite, movie]);
-          }}
+          onClick={addStorage}
+          // setFavorite([...favorite, movie]);
         >
           Add to Favorite
         </div>
